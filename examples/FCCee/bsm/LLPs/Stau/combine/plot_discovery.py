@@ -8,25 +8,38 @@ colors = [
     ROOT.kCyan+1, ROOT.kPink+1, ROOT.kViolet, ROOT.kTeal+1
 ]
 
-lifetimes = ["20cm", "50cm", "1m", "6m", "10m", "20m"]
-
-SCALE_FACTOR = 0.001
+lifetimes = ["0.5m", "1m","2m", "5m", "10m", "20m", "50m"]
+SCALE_FACTOR = 0.01
 
 cross_sections = {
-    "100": 0.07735,
-    "105": 0.05196,
-    "110": 0.02923,
-    "115": 0.01067,
-    "118": 0.002752,
-    "119": 0.0009792,
+    "120": 8.36226000e-02,
+    "130": 6.76073000e-02,
+    "140": 5.16252000e-02,
+    "150": 3.61405000e-02,
+    "160": 2.41349000e-02,
+    "170": 1.58984000e-02,
+    "180": 8.77581000e-03,
 }
 
-masses = ["100", "105", "110", "115", "118", "119"]
+masses = ["120", "130", "140", "150", "160", "170", "180"]
 xvals  = array('d', [float(m) for m in masses])
 
-limits_dir = "/eos/user/s/svashish/FCCAnalyses/examples/FCCee/bsm/LLPs/Stau/combine/limits"
-json_path  = os.path.join(limits_dir, "limits_3years_2003.json")
-plots_dir  = "/eos/user/s/svashish/FCCAnalyses/examples/FCCee/bsm/LLPs/Stau/combine/plots_lumi3years_2003"
+# my folder
+# limits_dir = "/afs/desy.de/user/m/mrandria/DUST/output/KV_DV_all/limits4years/"
+# json_path  = os.path.join(limits_dir, "limits.json")
+# plots_dir  = "/afs/desy.de/user/m/mrandria/DUST/output/KV_DV_all/plots"
+
+# BETA 
+# input_json = "/afs/desy.de/user/m/mrandria/ThomasData/FCCAna/Final/BetaCut/root/results.json"
+plots_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/beta/plots"
+limits_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/beta/limits4years"
+json_path  = os.path.join(limits_dir, "limits.json")
+
+# thomas cuts folder
+# limits_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/limits4years"
+# json_path  = os.path.join(limits_dir, "limits.json")
+# plots_dir  = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/combine_plots"
+
 os.makedirs(plots_dir, exist_ok=True)
 
 with open(json_path) as f:
@@ -38,7 +51,9 @@ def get_entry(mass, lt):
         raise KeyError(f"Key {key} not found in limits.json")
     return data[key]
 
-L_current = 2.7e6  # 3 years 1 IP
+L_current = 2.70e6 / 4  # 4 years 1 IP pb^-1
+L_1y = 0.67e6 / 4  # 1 year 1 IP pb^-1
+L_1d = 0.67e6 / 4 / 365  # 1 day 1 IP pb^-1
 
 # Create canvas for overlay
 c = ROOT.TCanvas("c_overlay", "Lumi required for Discovery", 1200, 900)
@@ -47,9 +62,9 @@ c.SetGrid()
 c.SetTickx()
 c.SetTicky()
 frame = ROOT.TH2F("frame", "5 #sigma discovery reach; m_{#tilde{#tau}} [GeV]; Required Lumi [pb^{-1}]", 
-                  100, 95, 125, 100, 1e1, 1e10)
+                  100, 110, 190, 100, 1.1, 1e9)
 frame.SetStats(0)
-frame.SetMinimum(1e1)
+frame.SetMinimum(1.5)
 frame.SetMaximum(1e14)
 frame.Draw()
 c.SetLogy()  # apply log scale after drawing
@@ -98,7 +113,7 @@ for idx, lifetime in enumerate(lifetimes):
     graphs.append((gr, lifetime))
 
 # Horizontal reference line at L_current
-ref_line = ROOT.TLine(95, L_current, 125, L_current)
+ref_line = ROOT.TLine(110, L_current, 190, L_current)
 ref_line.SetLineColor(ROOT.kBlack)
 ref_line.SetLineStyle(2)
 ref_line.SetLineWidth(2)
@@ -108,11 +123,10 @@ ref_label = ROOT.TLatex()
 ref_label.SetNDC(False)
 ref_label.SetTextSize(0.028)
 ref_label.SetTextColor(ROOT.kBlack)
-ref_label.DrawLatex(96, L_current * 0.50, "L = 2.7ab^{-1} (3 years, 1 IP)")
+ref_label.DrawLatex(140, L_current * 1.5, "L = 0.67ab^{-1} (4 years, 1 IP)")
 
 # 1-year line
-L_1y = 0.9e6
-ref_line_1y = ROOT.TLine(95, L_1y, 125, L_1y)
+ref_line_1y = ROOT.TLine(110, L_1y, 190, L_1y)
 ref_line_1y.SetLineColor(ROOT.kBlue)
 ref_line_1y.SetLineStyle(2)
 ref_line_1y.SetLineWidth(2)
@@ -122,11 +136,10 @@ ref_label_1y = ROOT.TLatex()
 ref_label_1y.SetNDC(False)
 ref_label_1y.SetTextSize(0.028)
 ref_label_1y.SetTextColor(ROOT.kBlue)
-ref_label_1y.DrawLatex(96, L_1y * 0.50, "L = 0.9ab^{-1} (1 year, 1 IP)")
+ref_label_1y.DrawLatex(140, L_1y * 0.50, "L = 0.16ab^{-1} (1 year, 1 IP)")
 
 # 1-day line
-L_1d = 6480
-ref_line_1d = ROOT.TLine(95, L_1d, 125, L_1d)
+ref_line_1d = ROOT.TLine(110, L_1d, 190, L_1d)
 ref_line_1d.SetLineColor(ROOT.kGreen+2)
 ref_line_1d.SetLineStyle(2)
 ref_line_1d.SetLineWidth(2)
@@ -136,7 +149,7 @@ ref_label_1d = ROOT.TLatex()
 ref_label_1d.SetNDC(False)
 ref_label_1d.SetTextSize(0.028)
 ref_label_1d.SetTextColor(ROOT.kGreen+2)
-ref_label_1d.DrawLatex(96, L_1d * 0.50, "L = 6480 pb^{-1} (1 day, 1 IP)")
+ref_label_1d.DrawLatex(140, L_1d * 1.50, "L = 456 pb^{-1} (1 day, 1 IP)")
 
 # Legend
 legend = ROOT.TLegend(0.15, 0.60, 0.40, 0.88)
@@ -152,7 +165,7 @@ label = ROOT.TLatex()
 label.SetNDC()
 label.SetTextSize(0.035)
 label.DrawLatex(0.68, 0.20, "FCC-ee Simulation")
-label.DrawLatex(0.68, 0.15, "#sqrt{s} = 240 GeV")
+label.DrawLatex(0.68, 0.15, "#sqrt{s} = 365 GeV")
 
 lumi_label = ROOT.TLatex()
 lumi_label.SetNDC()
@@ -166,5 +179,8 @@ c.Update()
 
 # Save
 outfile = os.path.join(plots_dir, "discovery_lumi_all_lifetimes_2003.png")
+outfile_pdf = os.path.join(plots_dir, "discovery_lumi_all_lifetimes_2003.pdf")
 c.SaveAs(outfile)
+c.SaveAs(outfile_pdf)
+c.Close()
 print(f"Saved overlay plot: {outfile}")

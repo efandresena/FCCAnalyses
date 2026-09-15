@@ -6,24 +6,39 @@ from array import array
 pastel_green  = ROOT.TColor.GetColor("#A6CEE3")
 pastel_yellow = ROOT.TColor.GetColor("#FFF2A8")
 
-lifetimes = ["20cm", "50cm", "1m", "2m", "3m", "4m", "6m", "10m", "20m"]
+lifetimes = ["0.5m", "1m", "2m", "5m", "10m", "20m", "50m"]
 
-SCALE_FACTOR = 0.01 # taken from datacards
+SCALE_FACTOR = 0.001 # taken from datacards
 
 cross_sections = {
-    "100": 0.07735,
-    "105": 0.05196,
-    "110": 0.02923,
-    "115": 0.01067,
-    "118": 0.002752,
-    "119": 0.0009792,  
+    "120": 8.36226000e-02,
+    "130": 6.76073000e-02,
+    "140": 5.16252000e-02,
+    "150": 3.61405000e-02,
+    "160": 2.17642000e-02,
+    "170": 9.40847000e-03,
+    "180": 8.77721000e-04,
 }
 
-masses = ["100", "105", "110", "115", "118" , "119"]
+masses = ["120", "130", "140", "150", "160", "170", "180"]
 xvals  = array('d', [float(m) for m in masses])
 
-limits_dir = "/eos/user/s/svashish/FCCAnalyses/examples/FCCee/bsm/LLPs/Stau/combine/limits"
-json_path  = os.path.join(limits_dir, "limits_1day_2003.json")
+# plots_dir  = "/afs/desy.de/user/m/mrandria/DUST/output/KV_DV_all/plots"
+# limits_dir = "/afs/desy.de/user/m/mrandria/DUST/output/KV_DV_all/limits4years"
+# json_path  = os.path.join(limits_dir, "limits.json")
+
+# thomas cuts folder
+plots_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/beta/plots"
+limits_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/beta/limits4years"
+json_path  = os.path.join(limits_dir, "limits.json")
+
+
+# output_dir = "/afs/desy.de/user/m/mrandria/DUST/output/thomas_cuts/friday/datacards"
+# limits_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/limits4years"
+# json_path  = os.path.join(limits_dir, "limits.json")
+# plots_dir  = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/combine_plots"
+
+os.makedirs(plots_dir, exist_ok=True)
 
 with open(json_path) as f:
     data = json.load(f)
@@ -74,6 +89,8 @@ for lifetime in lifetimes:
     c = ROOT.TCanvas("c", "Brazil plot vs mass", 1200, 900)
     c.SetLogy()
 
+    if lifetime == "0.5m":
+        lifetime = "50cm"
     gr_2sigma.SetTitle(
         f"Long-lived #tilde{{#tau}} in GMSB (c#tau = {lifetime});"
         "m_{#tilde{#tau}} [GeV];"
@@ -81,8 +98,8 @@ for lifetime in lifetimes:
     )
 
     gr_2sigma.Draw("AF") # fill the polygon- this gets the 2sig band
-    gr_2sigma.GetXaxis().SetRangeUser(97, 120)
-    gr_2sigma.GetYaxis().SetRangeUser(1e-7, 2.0)
+    gr_2sigma.GetXaxis().SetRangeUser(115, 185)
+    gr_2sigma.GetYaxis().SetRangeUser(1e-7, 70.0)
 
     gr_1sigma.Draw("F same") # on same canvas get the 1sig band
 
@@ -114,20 +131,23 @@ for lifetime in lifetimes:
     label.SetNDC()
     label.SetTextSize(0.035)
     label.DrawLatex(0.18, 0.85, "FCC-ee Simulation")
-    label.DrawLatex(0.18, 0.80, "#sqrt{s} = 240 GeV")
+    label.DrawLatex(0.18, 0.80, "#sqrt{s} = 365 GeV")
 
     lumi_label = ROOT.TLatex()
     lumi_label.SetNDC()
     lumi_label.SetTextSize(0.035)
     lumi_label.SetTextAlign(31)  # right-aligned
-    # lumi_label.DrawLatex(0.88, 0.15, "L = 1.08e7 pb^{-1} (Integrated Lumi)")
+    lumi_label.DrawLatex(0.88, 0.15, "L = 0.67ab^{-1} (4 years, 1 IP)")  # Adjust the position as needed
     # lumi_label.DrawLatex(0.88, 0.15, "L = 2.7e6 pb^{-1} (3 years, 1 IP)")
     # lumi_label.DrawLatex(0.88, 0.15, "L = 0.9e6 pb^{-1} (1 year, 1 IP)")
-    lumi_label.DrawLatex(0.88, 0.15, "L = 6480 pb^{-1} (1 day, 1 IP)")
+    # lumi_label.DrawLatex(0.88, 0.15, "L = 6480 pb^{-1} (1 day, 1 IP)")
 
 
     # save the file
-    plots_dir = "/eos/user/s/svashish/FCCAnalyses/examples/FCCee/bsm/LLPs/Stau/combine/plots_lumi1day_2003"
+    # plots_dir = "/afs/desy.de/user/m/mrandria/DUST/output/KV_DV_all/plots"
     outfile = os.path.join(plots_dir, f"brazil_plot_lifetime_all_channels_{lifetime}.png")
+    outfile_pdf = os.path.join(plots_dir, f"brazil_plot_lifetime_all_channels_{lifetime}.pdf")
     c.SaveAs(outfile)
+    c.SaveAs(outfile_pdf)
+    c.Close()
     print(f"Saved: {outfile}")

@@ -3,17 +3,22 @@ import ROOT
 import os
 import numpy as np
 
-lifetime_labels = ["20cm", "50cm", "1m", "2m", "3m", "4m"]
-masses = np.array([100, 105, 110, 115])
+lifetime_labels = ["1m", "10m"]
+masses = np.array([150, 160, 170, 180])
 cross_sections = {
-    "100": 0.07735,
-    "105": 0.05196,
-    "110": 0.02923,
-    "115": 0.01067,
+    "150": 3.61349000e-11 * 1e9,
+    "160": 2.41349000e-11 * 1e9,
+    "170": 9.40847000e-12 * 1e9,
+    "180": 8.77581000e-13 * 1e9,
 }
 SCALE_FACTOR = 0.001
-limits_dir = "/eos/user/s/svashish/FCCAnalyses/examples/FCCee/bsm/LLPs/Stau/combine/limits"
-json_path = os.path.join(limits_dir, "limits.json")
+
+limits_dir = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/limits4years"
+json_path  = os.path.join(limits_dir, "limits.json")
+plots_dir  = "/afs/desy.de/user/m/mrandria/DUST/COMBINE/combine_plots"
+
+os.makedirs(plots_dir, exist_ok=True)
+
 
 with open(json_path) as f:
     data = json.load(f)
@@ -34,8 +39,8 @@ def get_entry(mass, lt):
 lifetimes = np.array([parse_lifetime(x) for x in lifetime_labels])
 
 # Fixed bin edges so each (mass, lifetime) point sits at a bin centre
-mass_edges = np.array([97.5, 102.5, 107.5, 112.5, 117.5], dtype=float)
-lt_edges   = np.array([10., 35., 75., 150., 250., 350., 450.], dtype=float)
+mass_edges = np.array([157.5, 162.5, 177.5, 182.5], dtype=float)
+lt_edges   = np.array([1., 10.], dtype=float)
 
 def make_xs_hist(name, title, key):
     h = ROOT.TH2F(name, title,
@@ -139,6 +144,9 @@ label.DrawLatex(0.60, 0.25, "FCC-ee Simulation")
 label.DrawLatex(0.60, 0.20, "#sqrt{s} = 240 GeV")
 
 c.Update()
-c.SaveAs("stau_exclusion_limit.png")
-c.SaveAs("stau_exclusion_limit.pdf")
+outfile = os.path.join(plots_dir, "stau_exclusion_contour.png")
+outfile_pdf = os.path.join(plots_dir, "stau_exclusion_contour.pdf")
+c.SaveAs(outfile)
+c.SaveAs(outfile_pdf)
+c.Close()
 print("Saved stau_exclusion_limit.png / .pdf")
